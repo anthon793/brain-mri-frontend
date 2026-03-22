@@ -39,3 +39,8 @@ dist-ssr
 .project
 .pydevproject
 .settings/
+
+# Markdown files (keep README files tracked)
+*.md
+!README.md
+!**/README.md
