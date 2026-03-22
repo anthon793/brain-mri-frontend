@@ -28,8 +28,8 @@ A modern web-based platform for AI-powered brain tumor detection from MRI scans,
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/neuroscan-ai.git
-cd neuroscan-ai
+git clone https://github.com/anthon793/brain-mri-frontend.git
+cd brain-mri-frontend
 
 # Install dependencies
 npm install
