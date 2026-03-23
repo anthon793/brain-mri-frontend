@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main, develop]
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -40,7 +43,7 @@ jobs:
           path: dist/
           retention-days: 3
 
-  deploy:
+  pages-build:
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -49,18 +52,41 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          name: dist-20.x
-          path: dist/
+          node-version: 20.x
+          cache: 'npm'
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project for Pages
+        run: npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          cname: neuroscan-ai.example.com  # Optional: Update with your domain
+          path: dist
+
+  deploy:
+    needs: pages-build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
       - name: Deployment notification
         run: echo "✅ Deployment completed successfully!"
